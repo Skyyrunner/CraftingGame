@@ -33,6 +33,13 @@ class TestPrefixReader(unittest.TestCase):
         with self.assertRaises(NameError):
             expr.evaluate({"$var2":1})
 
+    def test_etc(self):
+        # testing that misc. functions work
+        expr = PrefixHolder(["range", 1, 2])
+        self.assertTrue(1 <= expr.evalSimple(["range", 1, 2]) <= 2)
+        self.assertTrue(1 <= expr.evalSimple(["triangular", 1, 2, 1.5]) <= 2)
+        self.assertEqual(expr.evalSimple(["pow", 2, 4]), 2**4)
+
     def test_recursion(self):
         # Test that nested expressions work
         expr = PrefixHolder(["+", ["+", 1, 2], 3])

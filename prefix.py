@@ -1,14 +1,19 @@
 import json
 from enum import Enum
 import math
+import random
 #import rpdb2; rpdb2.start_embedded_debugger('1234')
 
+# -1 for 'any'
 operators = {
-    "+": 2,
+    "+": -1,
     "-": 2,
     "/": 2,
-    "*": 2,
-    "sqrt": 1
+    "*": -1,
+    "sqrt": 1,
+    "range": 2,
+    "triangular": 3,
+    "pow": 2
     }
 
 class ErrorTypes(Enum):
@@ -56,8 +61,11 @@ class PrefixHolder:
     '+'  :  lambda args: sum(args),
     '-'  :  lambda args: args[0] - args[1],
     '/'  :  lambda args: args[0] / args[1],
-    '*'  :  lambda args: args[0] * args[1],
-    'sqrt': lambda args: math.sqrt(args[0])
+    '*'  :  lambda args: reduce(lambda x,y: x * y, args),
+    'sqrt': lambda args: math.sqrt(args[0]),
+    'range': lambda args: random.uniform(args[0], args[1]),
+    'triangular': lambda args: random.triangular(args[0], args[1], args[2]),
+    'pow': lambda args: math.pow(args[0], args[1])
     }
         
     # Create lamba functions, that accept lists, to execute the simple expressions.
@@ -73,9 +81,10 @@ class PrefixHolder:
             raise OperatorError(expr)
         # Check # of args
         expectedArgs = operators[expr[0]]
-        numArgs = len(expr)-1
-        if numArgs != expectedArgs:
-            raise ExpressionError(expr, ErrorTypes.ArgumentError)
+        if expectedArgs != -1:
+            numArgs = len(expr)-1
+            if numArgs != expectedArgs:
+                raise ExpressionError(expr, ErrorTypes.ArgumentError)
     
     def evalSimple(self, expr, variables = {}):
         # Evaluate a single expression consisting of one operator and its components.
