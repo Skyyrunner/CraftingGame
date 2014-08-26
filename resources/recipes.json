@@ -1,0 +1,88 @@
+{
+    "dagger": {
+        "armor_pen": [
+            "+",
+            [
+                "/",
+                "$weight",
+                100.0
+            ],
+            [
+                "/",
+                "$hardness",
+                1000.0
+            ]
+        ],
+        "armor_pen_base": 0.3,
+        "balance": [
+            "/",
+            "$weight",
+            25
+        ],
+        "balance_base": 0.6,
+        "crit": [
+            "/",
+            "$hardness",
+            20.0
+        ],
+        "crit_base": 0.25,
+        "durability": [
+            "/",
+            "$malleability",
+            25
+        ],
+        "durability_base": 8.0,
+        "max_dmg": [
+            "+",
+            [
+                "/",
+                "$weight",
+                2.0
+            ],
+            [
+                "/",
+                "$hardness",
+                20.0
+            ]
+        ],
+        "max_dmg_base": 9.0,
+        "min_dmg": [
+            "/",
+            "$weight",
+            4.0
+        ],
+        "min_dmg_base": 2.0,
+        "recipe": {
+            "main": "blade",
+            "parts_needed": [
+                "blade",
+                "hilt"
+            ],
+            "parts_optional": [
+                "guard",
+                "decoration"
+            ]
+        },
+        "speed": [
+            "*",
+            "-1",
+            [
+                "/",
+                "$weight",
+                4
+            ]
+        ],
+        "speed_base": 5.0,
+        "stagger": [
+            "/",
+            "$weight",
+            "150"
+        ],
+        "stagger_base": 0.1,
+        "value": [
+            "+",
+            "$matval"
+        ],
+        "value_base": 15.0
+    }
+}

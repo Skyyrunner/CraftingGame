@@ -1,0 +1,32 @@
+{
+    "feathers": {
+        "group": "organic",
+        "hardness": [
+            "range",
+            0.5,
+            2.0
+        ],
+        "malleability": 1.0,
+        "value": 50.0,
+        "weight": 0.01
+    },
+    "iron": {
+        "group": "metal",
+        "hardness": [
+            "range",
+            40.0,
+            80.0
+        ],
+        "malleability": [
+            "-",
+            120.0,
+            "$hardness"
+        ],
+        "value": 100.0,
+        "weight": [
+            "range",
+            0.8,
+            1.2
+        ]
+    }
+}
