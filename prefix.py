@@ -4,6 +4,7 @@ import math
 import random
 #import rpdb2; rpdb2.start_embedded_debugger('1234')
 
+strTypes = [str, unicode]
 # -1 for 'any'
 operators = {
     "+": -1,
@@ -48,7 +49,7 @@ class OperatorError(BaseException):
         self.expr = expr
 
     def __str__(self):
-        return "Unknown operator: " + self.expr[0]
+        return "Unknown operator: " + repr(self.expr[0])
 
 class PrefixHolder:
     def __init__(self, expr = []):
@@ -73,6 +74,9 @@ class PrefixHolder:
         return self.lambdas[operator]
 
     def validateExpr(self, expr):
+        if type(expr) in [int, float]:
+            return
+
         # Checks for errors in expressions, common to complex and simple expressions.
         if len(expr) == 0:
             raise ExpressionError(expr, ErrorTypes.NoExpression)
@@ -95,13 +99,13 @@ class PrefixHolder:
             if x == 0:
                 continue # first element doesn't count, is operator
             argType = type(expr[x])
-            if argType != str and argType != int and argType != float:
+            if not argType in strTypes and argType != int and argType != float:
                 if argType == list:
                     # No nested expressions allowed
                     raise ExpressionError(expr, ErrorTypes.NestedExpression)
                 raise ExpressionError(expr, ErrorTypes.InvalidObject) # Objects ('{}') are illegal
             # Verify variables
-            if type(expr[x]) == str:
+            if type(expr[x]) in strTypes:
                 if expr[x][0] != "$":
                     raise ExpressionError(expr, ErrorTypes.InvalidArgument)
                 elif not expr[x][1:] in variables:
@@ -110,7 +114,7 @@ class PrefixHolder:
         # Now do calculations
         args = expr[1:]
         for i in xrange(len(args)):
-            if type(args[i]) == str:
+            if type(args[i]) in strTypes:
                 args[i] = variables[args[i][1:]] # Strip sigil and retrieve value.
         return self.lambafactory(expr[0])(args)
     
@@ -128,4 +132,6 @@ class PrefixHolder:
 
     # Variables to be referenced by the expression.
     def evaluate(self, variables = {}): 
+        if type(self.expr) != list:
+            return self.expr
         return self.recursiveEval(self.expr, variables)

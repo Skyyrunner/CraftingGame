@@ -41,6 +41,9 @@ class TestPrefixReader(unittest.TestCase):
         self.assertEqual(expr.evalSimple(["pow", 2, 4]), 2**4)
 
     def test_recursion(self):
+        # Unicode expressions must work
+        expr = PrefixHolder([u'+', 100, '$ham'])
+        self.assertEqual(expr.evaluate({'ham': 5}), 105)
         # Test that nested expressions work
         expr = PrefixHolder(["+", ["+", 1, 2], 3])
         self.assertEqual(expr.evaluate(), 6)
@@ -52,6 +55,11 @@ class TestPrefixReader(unittest.TestCase):
         # Test that nested expressions of various arg lengths work
         expr = PrefixHolder(["+", ["sqrt", 9], 3])
         self.assertEqual(expr.evaluate(), 6)
+
+        # Test that simple statements work
+        expr = PrefixHolder(10)
+        self.assertEqual(10, expr.evaluate())
+
     
     def test_EvalSimple(self):
         expr = PrefixHolder(["+", 1, 1])
@@ -96,6 +104,7 @@ class TestPrefixReader(unittest.TestCase):
         self.assertEqual(3, expr.evalSimple(['+', 1, "$c"], {"c": 2}))
         self.assertEqual(4, expr.evalSimple(['sqrt', 16]))
         self.assertEqual(1, expr.evalSimple(['/', "$a", "$b"], {"a": 1, "b": 1}))
+
             
 
 if __name__=="__main__":
