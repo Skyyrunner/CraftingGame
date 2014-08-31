@@ -1,0 +1,6 @@
+# Compiled bytecode
+*.pyc
+# Raw files
+raw/*
+# Nonneeded files
+discarded/*

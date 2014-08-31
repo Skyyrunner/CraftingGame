@@ -1,0 +1,77 @@
+{
+    "brittle": {
+        "affix_type": "pre",
+        "arguments": [
+            "$basename"
+        ],
+        "attaches_to": [
+            "iron"
+        ],
+        "condition": [
+            "<",
+            "$malleability",
+            43.0
+        ],
+        "description": "This %s is particularly brittle."
+    },
+    "downy": {
+        "affix_type": "pre",
+        "arguments": [
+            "$basename"
+        ],
+        "attaches_to": [
+            "feathers"
+        ],
+        "condition": [
+            "<",
+            "$hardness",
+            0.4
+        ],
+        "description": "These %s are downy and soft."
+    },
+    "hard": {
+        "affix_type": "pre",
+        "arguments": [
+            "$basename"
+        ],
+        "attaches_to": [
+            "iron"
+        ],
+        "condition": [
+            ">",
+            "$hardness",
+            75.0
+        ],
+        "description": "This %s is particularly hard."
+    },
+    "malleable": {
+        "affix_type": "pre",
+        "arguments": [
+            "$basename"
+        ],
+        "attaches_to": [
+            "iron"
+        ],
+        "condition": [
+            ">",
+            "$malleability",
+            77.0
+        ],
+        "description": "This %s is particularly malleable."
+    },
+    "soft": {
+        "affix_type": "pre",
+        "arguments": [
+            "$basename"
+        ],
+        "attaches_to": [
+            "iron"
+        ],
+        "condition": [
+            "<",
+            "$hardness",
+            45.0
+        ],
+        "description": "This %s is particularly soft."
+    }
+}
