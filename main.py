@@ -36,12 +36,13 @@ class BaseState(object):
             }
 
     # Used to combine commands added by child classes to the base class's commands
-    def extendCommmands(self, aliases, helptext, functions):
+    def extendCommands(self, aliases, helptext, functions):
         self.aliases = dict(self.aliases.items() + aliases.items())
         self.helptext = dict(self.helptext.items() + helptext.items())
         self.functions = dict(self.functions.items() + functions.items())
 
-
+    def context(self): # If you want to put something in front of the >
+        return ""
 
     def doHelp(self, rawinput):
         if len(rawinput.split(" ")) != 1:
@@ -78,7 +79,8 @@ class BaseState(object):
         print makeYellow("Aliases for " + cmd + ":")
         print ", ".join(foundAliases)
 
-    def getInput(self, rawinput):
+    def getInput(self):
+        rawinput = raw_input(Fore.YELLOW + self.context() + "> " + Fore.RESET)
         if len(rawinput) > 0:
             try:
                 a = self.aliases[rawinput.split(" ")[0]]
@@ -109,9 +111,8 @@ class MainState(BaseState):
             "inventory": lambda rawinput: stack.append(InventoryViewState()),
             "forge": lambda rawinput: stack.append(ForgeState(self.forge))
         }
-        self.extendCommmands(aliases, helptext, functions)
+        self.extendCommands(aliases, helptext, functions)
         self.forge = objects.Forge() # forge in the current room.
-
 
 IndexLength = 4 
 class InventoryViewState(BaseState):
@@ -147,12 +148,19 @@ class InventoryViewState(BaseState):
         functions = {
             "list": self.listItems,
             "view": self.viewItem,
-            "quit": lambda rawinput: stack.pop(),
+            "quit": self.exit,
             "name": self.nameItem,
             "unname": self.unnameItem
         }        
         self.listItems()
-        self.extendCommmands(aliases, helptext, functions) 
+        self.extendCommands(aliases, helptext, functions) 
+
+    def context(self):
+        return "bag"
+
+    def exit(self, rawinput):
+        print "You close your bag."
+        stack.pop()
 
     def listItems(self, rawinput = ""):     
         print "In your bag are..."   
@@ -205,15 +213,59 @@ class ForgeState(BaseState):
     def __init__(self, forge):
         super(ForgeState, self).__init__()
         alias = {
-
+            "i": "inventory",
+            "inventory": "inventory",
+            "bag": "inventory",
+            "add": "add",
+            "a": "add",
+            "craft": "craft",
+            "make": "craft",
+            "c": "craft",
+            "m": "craft",
+            "create": "craft",
+            "list": "view",
+            "view": "view",
+            "l":"view",
+            "v": "view",
+            "quit": "quit",
+            "q": "quit",
+            "exit": "quit",
+            "leave": "quit"
         }
         helptext = {
-
+            "inventory": "View your inventory.",
+            "add [item #]": "Add a recipe to the forge.",
+            "craft [recipe #]": "Create an item from a recipe stored in the forge.",
+            'view ["recipes"|"items"]': "View recipes or your inventory.",
+            "quit": "Exit the forge menu."
         }
         functions = {
-
+            "inventory": lambda rawinput: stack.append(InventoryViewState()),
+            "view": self.view,
+            "quit": lambda rawinput: stack.pop()
         }
+        self.forge = forge
         self.extendCommands(alias, helptext, functions)
+
+    def context(self):
+        return "forge"
+
+    def view(self, rawinput):
+        args = rawinput.split(" ")
+        recipe = ["recipes", "recipe", "r"]
+        items = ["items", "item", "i"]
+        if args[1] in items:
+            stack.append(InventoryViewState())
+        elif args[1] in recipe:
+            if len(self.forge.recipes) == 0:
+                print "There are no recipes loaded into the forge."
+            else:
+                print "Inside the forge is ..."
+                print makeYellow("#   name")
+            for x in xrange(len(self.forge.recipes)):
+                index = str(x)
+                print makeYellow(index) + " " * (4 - len(index)) + self.forge.recipes[x].getName()
+
 
 stack.append(MainState())
 
@@ -222,7 +274,7 @@ for x in xrange(9):
     inventory.append(ItemMaker.getMaterial("iron"))
 for x in xrange(3):
     inventory.append(ItemMaker.getMaterial("feathers"))
+inventory.append(ItemMaker.getRecipeItem("dagger"))
 
 while len(stack) > 0:
-    input = raw_input(Fore.YELLOW + "> " + Fore.RESET)
-    stack[-1].getInput(input)
+    stack[-1].getInput()

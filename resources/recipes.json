@@ -1,6 +1,6 @@
 {
     "dagger": {
-        "armor_pen": [
+        "armor pen": [
             "+",
             [
                 "/",
@@ -13,26 +13,26 @@
                 1000.0
             ]
         ],
-        "armor_pen_base": 0.3,
+        "armor pen_base": 0.3,
         "balance": [
             "/",
             "$weight",
             25
         ],
         "balance_base": 0.6,
-        "crit": [
+        "crit chance": [
             "/",
             "$hardness",
             20.0
         ],
-        "crit_base": 0.25,
+        "crit chance_base": 0.25,
         "durability": [
             "/",
             "$malleability",
             25
         ],
         "durability_base": 8.0,
-        "max_dmg": [
+        "max damage": [
             "+",
             [
                 "/",
@@ -45,13 +45,13 @@
                 20.0
             ]
         ],
-        "max_dmg_base": 9.0,
-        "min_dmg": [
+        "max damage_base": 9.0,
+        "min damage": [
             "/",
             "$weight",
             4.0
         ],
-        "min_dmg_base": 2.0,
+        "min damage_base": 2.0,
         "recipe": {
             "main": "blade",
             "parts_needed": [

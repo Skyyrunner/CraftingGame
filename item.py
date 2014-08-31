@@ -3,6 +3,15 @@ from prefix import PrefixHolder
 import colorama
 from enum import Enum
 
+def makeYellow(txt):
+    return colorama.Fore.YELLOW + txt + colorama.Fore.RESET
+
+def makeCyan(txt):
+    return colorama.Fore.CYAN + txt + colorama.Fore.RESET 
+
+def invert(txt):
+    return colorama.Fore.BLACK + colorama.Back.YELLOW + txt + colorama.Style.RESET_ALL
+
 class ItemType(Enum):
     undefined = 0
     material = 1
@@ -36,6 +45,7 @@ class ItemMaker:
     def getRecipeItem(self, name):
         item = Recipe()
         ref = self.recipes[name]
+        item.name = name
         item.mainPart = ref["recipe"]["main"]
         item.neededParts = ref["recipe"]["parts_needed"]
         item.optionalParts = ref["recipe"]["parts_optional"]
@@ -46,9 +56,10 @@ class ItemMaker:
             strs = key.split("_")
             if strs[-1] == "base":
                 basename = "_".join(strs[:-1])
-                item.exprs[basename] = PrefixHolder(ref[key])
+                item.base[basename] = ref[key]
             else:
-                item.base[key] = ref[key]
+                item.exprs[key] = PrefixHolder(ref[key])
+
         return item
 
 
@@ -92,8 +103,10 @@ class ItemMaker:
 
         return item
 
+percents = ["balance", "crit chance"]
+
 MaxPropertyNameLength = 15
-class Item:
+class Item(object):
     def __init__(self):
         self.properties = {}
         self.prefixes = []
@@ -124,11 +137,12 @@ class Item:
         out = ""
         out += " " * (max(MaxPropertyNameLength / 3 * 2 - len(self.getName()), 0)) + "< " + self.getName() + " >"
         for x in self.properties:
-            out += "\n" + colorama.Fore.YELLOW + x + " " * (MaxPropertyNameLength - len(x)) \
-                    + colorama.Fore.RESET + str(self.getPrettyStat(x))
+            out += "\n" + makeYellow(x) + " " * (MaxPropertyNameLength - len(x)) \
+                    + str(self.getPrettyStat(x))
 
         return out
 
+MaxStatNameLength = 12
 class Recipe(Item):
     def __init__(self):
         super(Recipe, self).__init__()
@@ -136,4 +150,25 @@ class Recipe(Item):
         self.base = {} # The base values for a given stat
         self.exprs = {} # The formula for calculating the final stat.
     
-    #def 
+    def getName(self, ignoreNicknames = False):
+        if self.nickname != None and not ignoreNicknames:
+            return self.nickname + " (" + self.name + ")"
+        return self.name + " recipe"
+
+    def getProfile(self):
+        out = ""
+        out += " " * (max(MaxPropertyNameLength / 3 * 2 - len(self.getName()), 0)) + "< " + self.getName() + " >"
+        out += "\n" + invert("Required ingredients:") + "\n"
+        out += "\t" + ",".join(self.neededParts) + "\n"
+        out += invert("Optional ingredients:") + "\n"
+        out += "\t" + ",".join(self.optionalParts) + "\n"
+        out += invert("Base stats:")
+        for x in self.base:
+            if x in percents:
+                out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
+                   + str(int(self.base[x] * 100)) + "%"
+            else:
+                out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
+                   + str(self.base[x])
+
+        return out
