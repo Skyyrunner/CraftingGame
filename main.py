@@ -1,4 +1,5 @@
 import item
+import objects
 
 try:
     from colorama import init
@@ -8,9 +9,11 @@ except:
     print "Could not initialize colorama";
 
 inventory = []
+knownRecipes = []
 stack = []
 
-
+def makeYellow(txt):
+    return Fore.YELLOW + txt + Fore.RESET
 
 commandMaxLength = 20
 
@@ -24,6 +27,7 @@ class BaseState(object):
             }   
         self.helptext = {
             "help": "View this.",
+            "help [cmd]": "View help for a command.",
             "alias [cmd]": "List all alternative commands for 'cmd'"
             }
         self.functions = {
@@ -40,9 +44,13 @@ class BaseState(object):
 
 
     def doHelp(self, rawinput):
-        print Fore.YELLOW + "--------Help text--------"
+        if len(rawinput.split(" ")) != 1:
+            cmd = rawinput.split(" ")[1]
+            print makeYellow(cmd) + "    " + self.helptext[self.aliases[cmd]]
+            return
+        print makeYellow("--------Help text--------")
         for x in self.helptext:
-            print Fore.YELLOW + x + Fore.RESET + " " * (commandMaxLength - len(x)) + self.helptext[x]
+            print makeYellow(x) + " " * (commandMaxLength - len(x)) + self.helptext[x]
 
     def listAliases(self, rawinput):
         try:
@@ -67,7 +75,7 @@ class BaseState(object):
             print "That command doesn't exist!"
             return
 
-        print Fore.YELLOW + "Aliases for " + cmd + ":" + Fore.RESET
+        print makeYellow("Aliases for " + cmd + ":")
         print ", ".join(foundAliases)
 
     def getInput(self, rawinput):
@@ -85,17 +93,24 @@ class MainState(BaseState):
         aliases =  { 
                 "inventory": "inventory",
                 "i": "inventory",
-                "bag": "inventory"
+                "bag": "inventory",
+                "forge": "forge",
+                "make": "forge",
+                "create": "forge",
+                "f": "forge"
                 }
 
         helptext = {
-            "inventory": "View your inventory."
+            "inventory": "View your inventory.",
+            "forge": "Interact with the forge in the room."
         }
 
         functions = {
-            "inventory": lambda rawinput: stack.append(InventoryViewState())
+            "inventory": lambda rawinput: stack.append(InventoryViewState()),
+            "forge": lambda rawinput: stack.append(ForgeState(self.forge))
         }
         self.extendCommmands(aliases, helptext, functions)
+        self.forge = objects.Forge() # forge in the current room.
 
 
 IndexLength = 4 
@@ -110,38 +125,103 @@ class InventoryViewState(BaseState):
             "i": "list",
             "view": "view",
             "v": "view",
+            "look": "view",
             "quit": "quit",
             "exit": "quit",
-            "q": "quit"
+            "e": "quit",
+            "q": "quit",
+            "name": "name",
+            "nickname": "name",
+            "n": "name",
+            "unname": "unname",
+            "unnickname": "unname",
+            "un": "unname"
         }
         helptext = {
             "list": "List all items in bag.",
             "view [number]": "List the stats for an item at the position [number].",
-            "exit": "Close the inventory window."
+            "exit": "Close the inventory window.",
+            "name [item #] [name]": "Nickname an item.",
+            "unname [item #]": "Remove the nickname from an item."
         }
         functions = {
             "list": self.listItems,
             "view": self.viewItem,
-            "exit": lambda rawinput: states.pop()
-        }
+            "quit": lambda rawinput: stack.pop(),
+            "name": self.nameItem,
+            "unname": self.unnameItem
+        }        
         self.listItems()
         self.extendCommmands(aliases, helptext, functions) 
 
-    def listItems(self, rawinput = ""):        
+    def listItems(self, rawinput = ""):     
+        print "In your bag are..."   
+        print makeYellow("#   name")
         for i in xrange(len(inventory)):
             index = str(i)
-            print Fore.YELLOW + index + Fore.RESET + " " * (IndexLength - len(index)) + inventory[i].getName()
+            print makeYellow(index) + " " * (IndexLength - len(index)) + inventory[i].getName()
 
     def viewItem(self, rawinput):
         index = int(rawinput.split(" ")[1])
         print inventory[index].getProfile()
 
+    def nameItem(self, rawinput):
+        args = rawinput.split(" ")
+        try:
+            itemNum = int(args[1])
+            newName = " ".join(args[2:])
+        except:
+            print "Usage is " + makeYellow("name [item #] [new name]") + "."
+            return
+
+        try:
+            item = inventory[itemNum]
+        except:
+            print "Invalid item number input: " + Fore.RED + str(itemNum) + Fore.RESET
+            return
+
+        item.nickname = newName
+        print "Named " + makeYellow(item.getName(True)) + " as " + makeYellow(item.getName())
+
+    def unnameItem(self, rawinput):
+        args = rawinput.split(" ")
+        try:
+            itemNum = int(args[1])
+        except:
+            print "Usage is " + makeYellow("unname [item #]") + "."
+            return
+
+        try:
+            item = inventory[itemNum]
+        except:
+            print "Invalid item number input: " + Fore.RED + str(itemNum) + Fore.RESET
+            return
+
+        oldName = item.nickname
+        item.nickname = None
+        print "Removed nickname from " + makeYellow(oldName) + "."
+
+class ForgeState(BaseState):
+    def __init__(self, forge):
+        super(ForgeState, self).__init__()
+        alias = {
+
+        }
+        helptext = {
+
+        }
+        functions = {
+
+        }
+        self.extendCommands(alias, helptext, functions)
 
 stack.append(MainState())
 
 ItemMaker = item.ItemMaker()
-for x in xrange(10):
+for x in xrange(9):
     inventory.append(ItemMaker.getMaterial("iron"))
+for x in xrange(3):
+    inventory.append(ItemMaker.getMaterial("feathers"))
 
 while len(stack) > 0:
     input = raw_input(Fore.YELLOW + "> " + Fore.RESET)

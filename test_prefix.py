@@ -105,6 +105,21 @@ class TestPrefixReader(unittest.TestCase):
         self.assertEqual(4, expr.evalSimple(['sqrt', 16]))
         self.assertEqual(1, expr.evalSimple(['/', "$a", "$b"], {"a": 1, "b": 1}))
 
+    def test_boolean(self):
+        expr = PrefixHolder([">", 2, 3])
+        self.assertEqual(False, expr.evaluate())
+
+        expr = PrefixHolder(["<", 2, 3])
+        self.assertEqual(True, expr.evaluate())
+
+        expr = PrefixHolder([">=", 2, 3])
+        self.assertEqual(False, expr.evaluate())
+
+        expr = PrefixHolder(["<=", 2, 3])
+        self.assertEqual(True, expr.evaluate())
+
+        expr = PrefixHolder(["!", False])
+        self.assertEqual(True, expr.evaluate())
             
 
 if __name__=="__main__":

@@ -5,6 +5,7 @@ import random
 #import rpdb2; rpdb2.start_embedded_debugger('1234')
 
 strTypes = [str, unicode]
+valueTypes = [int, float, bool]
 # -1 for 'any'
 operators = {
     "+": -1,
@@ -14,7 +15,12 @@ operators = {
     "sqrt": 1,
     "range": 2,
     "triangular": 3,
-    "pow": 2
+    "pow": 2,
+    ">": 2,
+    "<": 2,
+    "!": 1,
+    ">=": 2,
+    "<=": 2
     }
 
 class ErrorTypes(Enum):
@@ -66,7 +72,12 @@ class PrefixHolder:
     'sqrt': lambda args: math.sqrt(args[0]),
     'range': lambda args: random.uniform(args[0], args[1]),
     'triangular': lambda args: random.triangular(args[0], args[1], args[2]),
-    'pow': lambda args: math.pow(args[0], args[1])
+    'pow': lambda args: math.pow(args[0], args[1]),
+    '>': lambda args: args[0] > args[1],
+    '<': lambda args: args[0] < args[1],
+    '>=': lambda args: args[0] >= args[1],
+    '<=': lambda args: args[0] <= args[1],
+    '!': lambda args: not args[0]
     }
         
     # Create lamba functions, that accept lists, to execute the simple expressions.
@@ -74,7 +85,7 @@ class PrefixHolder:
         return self.lambdas[operator]
 
     def validateExpr(self, expr):
-        if type(expr) in [int, float]:
+        if type(expr) in valueTypes:
             return
 
         # Checks for errors in expressions, common to complex and simple expressions.
@@ -99,7 +110,7 @@ class PrefixHolder:
             if x == 0:
                 continue # first element doesn't count, is operator
             argType = type(expr[x])
-            if not argType in strTypes and argType != int and argType != float:
+            if not argType in strTypes and not argType in valueTypes:
                 if argType == list:
                     # No nested expressions allowed
                     raise ExpressionError(expr, ErrorTypes.NestedExpression)
