@@ -46,7 +46,7 @@ class ExpressionError(BaseException):
             actual = len(self.expr)-1
             return "In expression\n\t" + repr(self.expr) + "\nexpected " + str(expect) + " arguments but got " + str(actual) + " arguments."
         elif self.type_ == ErrorTypes.InvalidArgument:
-            return "In expression\n\t" + repr(self.expr) + "\nfound invalid argument--check for $ sigil."
+            return "In expression\n\t" + repr(self.expr) + "\nfound invalid string argument--check for missing $ sigil or improper quotes."
         elif self.type_ == ErrorTypes.InvalidObject:
             return "In expression\n\t" + repr(self.expr) + "\nfound object('{}')--objects are illegal."
 
