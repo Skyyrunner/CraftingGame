@@ -23,9 +23,9 @@
         "crit chance": [
             "/",
             "$hardness",
-            20.0
+            300.0
         ],
-        "crit chance_base": 0.25,
+        "crit chance_base": 0.15,
         "durability": [
             "/",
             "$malleability",
@@ -65,7 +65,7 @@
         },
         "speed": [
             "*",
-            "-1",
+            -1,
             [
                 "/",
                 "$weight",
@@ -76,12 +76,12 @@
         "stagger": [
             "/",
             "$weight",
-            "150"
+            150
         ],
         "stagger_base": 0.1,
         "value": [
             "+",
-            "$matval"
+            "$value"
         ],
         "value_base": 15.0
     }
