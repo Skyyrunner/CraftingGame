@@ -62,9 +62,6 @@ class ItemMaker:
 
         return item
 
-
-
-
     # Second argument in case custom properties must be set.
     def getMaterial(self, name, properties = {}):
         item = Item()
@@ -103,7 +100,7 @@ class ItemMaker:
 
         return item
 
-percents = ["balance", "crit chance"]
+percents = ["balance", "crit chance", "armor pen"]
 
 MaxPropertyNameLength = 15
 class Item(object):
@@ -113,6 +110,15 @@ class Item(object):
         self.suffixes = []
         self.nickname = None
         self.flag = ItemType.undefined
+
+    def __eq__(self, other):
+        if other == None:
+            return False
+        a = self.properties == other.properties
+        b = self.prefixes == other.prefixes
+        c = self.suffixes == other.suffixes
+        d = self.flag == other.flag
+        return a and b and c and d
 
     def getPrettyStat(self, stat):
         statval = self.properties[stat]
@@ -150,25 +156,78 @@ class Recipe(Item):
         self.base = {} # The base values for a given stat
         self.exprs = {} # The formula for calculating the final stat.
     
+    def __eq__(self, other):
+        a = super(Recipe, self).__eq__(other)
+        try:
+            b = self.base == other.base
+        except AttributeError:
+            return False # if it doesn't have that element it's not a Recipe
+        return a and b
+
     def getName(self, ignoreNicknames = False):
         if self.nickname != None and not ignoreNicknames:
-            return self.nickname + " (" + self.name + ")"
+            return self.nickname + " (" + self.name + " recipe)"
         return self.name + " recipe"
 
     def getProfile(self):
         out = ""
         out += " " * (max(MaxPropertyNameLength / 3 * 2 - len(self.getName()), 0)) + "< " + self.getName() + " >"
-        out += "\n" + invert("Required ingredients:") + "\n"
+        out += "\n" + invert("Required parts:") + "\n"
         out += "\t" + ",".join(self.neededParts) + "\n"
-        out += invert("Optional ingredients:") + "\n"
+        out += invert("Optional parts:") + "\n"
         out += "\t" + ",".join(self.optionalParts) + "\n"
         out += invert("Base stats:")
+        dmg_min = 0
+        dmg_max = 0
         for x in self.base:
             if x in percents:
                 out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
                    + str(int(self.base[x] * 100)) + "%"
+            elif x == "min damage":
+                dmg_min = self.base[x] 
+            elif x == "max damage":
+                dmg_max = self.base[x]
             else:
                 out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
                    + str(self.base[x])
+        out += "\n" + makeYellow("damage") + " " * (MaxStatNameLength - len("damage")) + str(dmg_min) \
+                                          + "~" + str(dmg_max)
+
+        return out
+
+class ItemPart:
+    def __init__(self):
+        self.name = None
+        self.material = None
+
+class CraftedItem(Item):
+    def __init__(self):
+        super(CraftedItem, self).__init__()
+        self.flag = ItemType.craft
+        self.parts = {}
+
+
+    def __eq__(self, other):
+        a = super(CraftedItem, self).__eq__(other)
+        return a        
+
+    def getProfile(self):   
+        out = ""
+        out += " " * (max(MaxPropertyNameLength / 3 * 2 - len(self.getName()), 0)) + "< " + self.getName() + " >"
+        dmg_min = 0
+        dmg_max = 0
+        for x in self.properties:
+            if x in percents:
+                out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
+                   + str(int(self.properties[x] * 100)) + "%"
+            elif x == "min damage":
+                dmg_min = self.properties[x] 
+            elif x == "max damage":
+                dmg_max = self.properties[x]
+            else:
+                out += "\n" + makeYellow(x) + " " * (MaxStatNameLength - len(x)) \
+                   + str(self.properties[x])
+        out += "\n" + makeYellow("damage") + " " * (MaxStatNameLength - len("damage")) + str(dmg_min) \
+                                          + "~" + str(dmg_max)
 
         return out
